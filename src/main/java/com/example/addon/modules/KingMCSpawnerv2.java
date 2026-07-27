@@ -5,16 +5,16 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -56,21 +56,21 @@ public class KingMCSpawnerv2 extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
         timer++;
         if (timer < delay.get()) return;
         timer = 0;
 
         // Trạng thái 1: Chưa mở GUI -> Tìm và mở Spawner xung quanh
-        if (mc.currentScreen == null) {
+        if (mc.screen == null) {
             BlockPos spawnerPos = findNearbySpawner();
-            if (spawnerPos != null) {
-                mc.interactionManager.interactBlock(
+            if (spawnerPos != null && mc.gameMode != null) {
+                mc.gameMode.useItemOn(
                     mc.player,
-                    Hand.MAIN_HAND,
+                    InteractionHand.MAIN_HAND,
                     new BlockHitResult(
-                        Vec3d.ofCenter(spawnerPos),
+                        Vec3.atCenterOf(spawnerPos),
                         Direction.UP,
                         spawnerPos,
                         false
@@ -79,42 +79,44 @@ public class KingMCSpawnerv2 extends Module {
             }
         } 
         // Trạng thái 2: Đang mở GUI Spawner -> Click Dispenser & Lọc ném đồ
-        else if (mc.currentScreen instanceof GenericContainerScreen container) {
-            int syncId = container.getScreenHandler().syncId;
+        else if (mc.screen instanceof ContainerScreen container) {
+            int syncId = container.getMenu().containerId;
 
-            // Click vào nút Dispenser
-            mc.interactionManager.clickSlot(syncId, dispenserSlot.get(), 0, SlotActionType.PICKUP, mc.player);
+            if (mc.gameMode != null) {
+                // Click vào nút Dispenser
+                mc.gameMode.handleInventoryMouseClick(syncId, dispenserSlot.get(), 0, ClickType.PICKUP, mc.player);
 
-            boolean hasJunkItem = false;
-            int containerSlots = container.getScreenHandler().slots.size() - 36;
+                boolean hasJunkItem = false;
+                int containerSlots = container.getMenu().slots.size() - 36;
 
-            for (int i = 0; i < containerSlots; i++) {
-                ItemStack stack = container.getScreenHandler().getSlot(i).getStack();
-                if (!stack.isEmpty()) {
-                    // Nếu gặp vật phẩm không nằm trong danh sách cần ném -> Đánh dấu là đồ rác/mắc kẹt
-                    if (!targetItems.get().contains(stack.getItem())) {
-                        hasJunkItem = true;
-                        break;
-                    } else {
-                        // Ném vật phẩm ra ngoài
-                        mc.interactionManager.clickSlot(syncId, i, 1, SlotActionType.THROW, mc.player);
+                for (int i = 0; i < containerSlots; i++) {
+                    ItemStack stack = container.getMenu().getSlot(i).getItem();
+                    if (!stack.isEmpty()) {
+                        // Nếu gặp vật phẩm không nằm trong danh sách cần ném -> Đánh dấu là đồ rác
+                        if (!targetItems.get().contains(stack.getItem())) {
+                            hasJunkItem = true;
+                            break;
+                        } else {
+                            // Ném vật phẩm ra ngoài
+                            mc.gameMode.handleInventoryMouseClick(syncId, i, 1, ClickType.THROW, mc.player);
+                        }
                     }
                 }
-            }
 
-            // Nếu gặp rác không cần thiết hoặc đã xử lý xong -> Thoát GUI để lặp lại
-            mc.player.closeHandledScreen();
+                // Nếu gặp rác không cần thiết hoặc đã xử lý xong -> Thoát GUI để lặp lại
+                mc.player.closeContainer();
+            }
         }
     }
 
     // Quét tìm vị trí Spawner trong phạm vi 4 ô
     private BlockPos findNearbySpawner() {
-        BlockPos pPos = mc.player.getBlockPos();
+        BlockPos pPos = mc.player.blockPosition();
         for (int x = -4; x <= 4; x++) {
             for (int y = -4; y <= 4; y++) {
                 for (int z = -4; z <= 4; z++) {
-                    BlockPos pos = pPos.add(x, y, z);
-                    if (mc.world.getBlockState(pos).isOf(Blocks.SPAWNER)) {
+                    BlockPos pos = pPos.offset(x, y, z);
+                    if (mc.level.getBlockState(pos).is(Blocks.SPAWNER)) {
                         return pos;
                     }
                 }
@@ -123,4 +125,3 @@ public class KingMCSpawnerv2 extends Module {
         return null;
     }
 }
-
