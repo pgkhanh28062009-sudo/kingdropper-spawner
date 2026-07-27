@@ -6,12 +6,12 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 
-public class Addon extends MeteorAddon {
+public class AddonTemplate extends MeteorAddon {
     public static final Category CATEGORY = new Category("KingMC");
 
     @Override
     public void onInitialize() {
-        // Khai báo Module an toàn khi Meteor khởi chạy
+        // Khai báo Module khi Meteor khởi chạy
         Modules.get().add(new KingMCSpawnerv2(CATEGORY));
     }
 
