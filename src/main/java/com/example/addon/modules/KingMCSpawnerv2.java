@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class KingMCSpawnerv2 extends Module {
@@ -36,6 +37,7 @@ public class KingMCSpawnerv2 extends Module {
     private final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("vat-pham-nem")
         .description("Chọn các vật phẩm cần phân loại và ném ra ngoài.")
+        .defaultValue(new ArrayList<>())
         .build()
     );
 
@@ -81,24 +83,19 @@ public class KingMCSpawnerv2 extends Module {
         } 
         // Trạng thái 2: Đang mở GUI Spawner -> Click Dispenser & Lọc ném đồ
         else if (mc.screen instanceof AbstractContainerScreen) {
-            AbstractContainerScreen container = (AbstractContainerScreen) mc.screen;
+            AbstractContainerScreen<?> container = (AbstractContainerScreen<?>) mc.screen;
             int syncId = container.getMenu().containerId;
 
             if (mc.gameMode != null) {
                 // Click vào nút Dispenser
                 mc.gameMode.handleInventoryMouseClick(syncId, dispenserSlot.get(), 0, ClickType.PICKUP, mc.player);
 
-                boolean hasJunkItem = false;
                 int containerSlots = container.getMenu().slots.size() - 36;
 
                 for (int i = 0; i < containerSlots; i++) {
                     ItemStack stack = container.getMenu().getSlot(i).getItem();
                     if (!stack.isEmpty()) {
-                        // Nếu gặp vật phẩm không nằm trong danh sách cần ném -> Đánh dấu là đồ rác
-                        if (!targetItems.get().contains(stack.getItem())) {
-                            hasJunkItem = true;
-                            break;
-                        } else {
+                        if (targetItems.get().contains(stack.getItem())) {
                             // Ném vật phẩm ra ngoài
                             mc.gameMode.handleInventoryMouseClick(syncId, i, 1, ClickType.THROW, mc.player);
                         }
@@ -106,7 +103,7 @@ public class KingMCSpawnerv2 extends Module {
                 }
 
                 // Đóng GUI màn hình
-                mc.setScreen(null);
+                mc.player.closeContainer();
             }
         }
     }
