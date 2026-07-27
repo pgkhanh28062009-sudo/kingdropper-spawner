@@ -5,7 +5,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -79,7 +79,7 @@ public class KingMCSpawnerv2 extends Module {
             }
         } 
         // Trạng thái 2: Đang mở GUI Spawner -> Click Dispenser & Lọc ném đồ
-        else if (mc.screen instanceof ContainerScreen container) {
+        else if (mc.screen instanceof AbstractContainerScreen<?> container) {
             int syncId = container.getMenu().containerId;
 
             if (mc.gameMode != null) {
@@ -103,8 +103,8 @@ public class KingMCSpawnerv2 extends Module {
                     }
                 }
 
-                // Nếu gặp rác không cần thiết hoặc đã xử lý xong -> Thoát GUI để lặp lại
-                mc.player.closeContainer();
+                // Đóng GUI màn hình
+                mc.setScreen(null);
             }
         }
     }
