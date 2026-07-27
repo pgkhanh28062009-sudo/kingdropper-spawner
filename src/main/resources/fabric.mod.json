@@ -1,37 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "addon-template",
-  "version": "${version}",
-  "name": "Addon Template",
-  "description": "An addon template for Meteor Client addons.",
+  "id": "kingmc-spawner",
+  "name": "KingMC Spawner Addon",
+  "version": "2.0.0",
+  "description": "Auto Spawner addon for KingMC server.",
   "authors": [
-    "seasnail"
+    "You"
   ],
-  "contact": {
-    "sources": "https://github.com/MeteorDevelopment/meteor-addon-template"
-  },
-  "icon": "assets/template/icon.png",
-  "environment": "client",
   "entrypoints": {
     "meteor": [
-      "com.example.addon.AddonTemplate"
+      "com.example.addon.Addon"
     ]
   },
-  "mixins": [
-    "addon-template.mixins.json"
-  ],
-  "custom": {
-    "meteor-client:color": "225,25,25",
-    "modmenu": {
-      "parent": {
-        "id": "meteor-client"
-      }
-    }
-  },
-    "depends": {
-    "java": ">=21",
-    "minecraft": ">=1.21",
-    "meteor-client": "*"
-  }
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "*",
+    "java": ">=21"
   }
 }
