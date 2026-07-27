@@ -4,15 +4,13 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -86,27 +84,24 @@ public class KingMCSpawnerv2 extends Module {
         // Trạng thái 2: Đang mở GUI Spawner -> Click Dispenser & Lọc ném đồ
         else if (mc.screen instanceof AbstractContainerScreen) {
             AbstractContainerScreen<?> container = (AbstractContainerScreen<?>) mc.screen;
-            int syncId = container.getMenu().containerId;
 
-            if (mc.gameMode != null) {
-                // Click vào nút Dispenser
-                mc.gameMode.handleInventoryMouseClick(syncId, dispenserSlot.get(), 0, ClickType.PICKUP, mc.player);
+            // Click vào nút Dispenser bằng InvUtils
+            InvUtils.click().slotId(dispenserSlot.get());
 
-                int containerSlots = container.getMenu().slots.size() - 36;
+            int containerSlots = container.getMenu().slots.size() - 36;
 
-                for (int i = 0; i < containerSlots; i++) {
-                    ItemStack stack = container.getMenu().getSlot(i).getItem();
-                    if (!stack.isEmpty()) {
-                        if (targetItems.get().contains(stack.getItem())) {
-                            // Ném vật phẩm ra ngoài
-                            mc.gameMode.handleInventoryMouseClick(syncId, i, 1, ClickType.THROW, mc.player);
-                        }
+            for (int i = 0; i < containerSlots; i++) {
+                ItemStack stack = container.getMenu().getSlot(i).getItem();
+                if (!stack.isEmpty()) {
+                    if (targetItems.get().contains(stack.getItem())) {
+                        // Ném vật phẩm ra ngoài bằng InvUtils
+                        InvUtils.drop().slot(i);
                     }
                 }
-
-                // Đóng GUI màn hình
-                mc.setScreen(null);
             }
+
+            // Đóng GUI màn hình
+            mc.setScreen(null);
         }
     }
 
