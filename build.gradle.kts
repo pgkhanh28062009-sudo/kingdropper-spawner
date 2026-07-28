@@ -34,6 +34,7 @@ java {
     }
 }
 
+
 fun toMinecraftCompat(version: String): String {
     val match = Regex("""^(\d{2})\.([1-9]\d*)(?:\.([1-9]\d*))?$""")
         .matchEntire(version)
@@ -64,6 +65,15 @@ tasks {
             rename { "${it}_${inputs.properties["archivesName"]}" }
         }
     }
+withType<JavaCompile>().configureEach {
+    options.release.set(21)
+    options.compilerArgs.addAll(
+        listOf(
+            "-Xlint:deprecation",
+            "-Xlint:unchecked"
+        )
+    )
+}
 
     withType<JavaCompile>().configureEach {
         options.compilerArgs.addAll(
