@@ -9,12 +9,13 @@
   ],
   "entrypoints": {
     "meteor": [
-      "com.example.addon.Addon"
+      "com.example.addon.AddonTemplate"
     ]
   },
   "depends": {
     "fabricloader": ">=0.15.0",
     "minecraft": "*",
-    "java": ">=21"
+    "java": ">=21",
+    "meteor-client": "*"
   }
 }
